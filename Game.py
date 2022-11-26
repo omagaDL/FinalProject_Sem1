@@ -11,7 +11,7 @@ import random
 
 pygame.init()
 FILE_DIR = os.path.dirname(__file__)
-size = width, height = 800, 600  # размерчик нужно будет поменять
+size = width, height = 1280, 720  # размерчик нужно будет поменять
 level_h, level_w = 0, 0
 clock = pygame.time.Clock()  # вот тут вот вообще лучше ничего не трогать(и на строку ниже тоже)
 screen = pygame.display.set_mode(size)
@@ -25,6 +25,7 @@ death = pygame.mixer.Sound('data_death.wav')
 hero = None
 time_ = 0
 time_record = 0
+
 
 class Camera(object):
     def __init__(self, camera_func, width, height):
@@ -52,7 +53,7 @@ def camera_configure(camera, target_rect):
 
 
 def loadLevel():
-    global playerX, playerY, level_h, level_w # объявляем глобальные переменные, это координаты героя
+    global playerX, playerY, level_h, level_w  # объявляем глобальные переменные, это координаты героя
 
     levelFile = open('%s/levels/1.txt' % FILE_DIR)
     line = " "
@@ -66,8 +67,8 @@ def loadLevel():
                     endLine = line.find("|")  # то ищем символ конца строки
                     level.append(
                         line[0: endLine])  # и добавляем в уровень строку от начала до символа "|"
-                    #level_h += 1
-                    #level_w = max(len(line) - 2, level_w)
+                    # level_h += 1
+                    # level_w = max(len(line) - 2, level_w)
 
         if line[0] != "":  # если строка не пустая
             commands = line.split()  # разбиваем ее на отдельные команды
@@ -86,12 +87,12 @@ def loadLevel():
 def text_render(inf, x, y, color):
     font = pygame.font.Font(None, 50)
     text = font.render(inf, 1, color)  # (100, 255, 100)
-    text_w = text.get_width()
-    text_h = text.get_height()
+    text_w = text.get_width() + 20
+    text_h = text.get_height() + 20
     screen.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
     pygame.draw.rect(screen, color,
-                     (x - 10 - text.get_width() // 2, y - 10 - text.get_height() // 2,
-                      text_w + 20, text_h + 20), 1)
+                     (x - text_w // 2, y - text_h // 2,
+                      text_w, text_h), 1)
 
 
 # для загрузки изображений
@@ -118,7 +119,7 @@ def print_sprite(x, y, im):
     return sprite_im
 
 
-# сюда тоже лучше не лезть, она все вырубает)
+# сюда тоже лучше не лезть, она все вырубает
 def terminate():
     pygame.quit()
     sys.exit()
@@ -127,55 +128,73 @@ def terminate():
 def start_screen():
     global sound, phase
     # x = width // 2 + 50
-    # y = heigth // 2 - 50
+    # y = height // 2 - 50
     pygame.mixer.music.load('data_title.mp3')
     pygame.mixer.music.play(-1)
+    mousepos = [0, 0]
     while True:
         fon = pygame.transform.scale(load_image(BACK[0]), (width, height))
         screen.blit(fon, (0, 0))
-        text_render("Новая игра", width // 2, height // 2, (100, 255, 100))
-        text_render("Выйти", width // 2, height - 50, (255, 0, 0))
         font = pygame.font.Font(None, 50)
         text = font.render("Новая игра", 1, (100, 255, 100))
-        start_w = text.get_width()
-        start_h = text.get_height()
+        start_w = text.get_width() + 20
+        start_h = text.get_height() + 20
         text = font.render("Выйти", 1, (255, 0, 0))
-        quit_w = text.get_width()
-        quit_h = text.get_height()
-        if sound == 1:
-            screen.blit(load_image('volume.png'), (750, 10))
-        else:
-            screen.blit(load_image('voice_off.png'), (750, 10))
+        quit_w = text.get_width() + 30
+        quit_h = text.get_height() + 20
         pygame.display.flip()
         clock.tick(FPS)
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.MOUSEMOTION:
+                mousepos = event.pos
+            elif event.type == pygame.QUIT:
                 terminate()
                 return
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if 750 < event.pos[0] < 790 and 5 < event.pos[1] < 40:
+                if width-50 < event.pos[0] < width-10 and 5 < event.pos[1] < 50:
                     if sound == 0:
                         sound = 1
                     else:
                         sound = 0
-                elif (width // 2 < event.pos[0] < width // 2 + start_w) and (
-                        height // 2 < event.pos[1] < height // 2 + start_h):
+                elif (width // 2 - start_w / 2 < event.pos[0] < width // 2 + start_w / 2) and (
+                        height // 2 - start_h / 2 < event.pos[1] < height // 2 + start_h / 2):
                     phase = 'gameplay'
                     return
-                elif (width // 2 < event.pos[0] < width // 2 + quit_w) and (
-                        height - 50 < event.pos[1] < height - 50 + quit_h):
+                elif (width // 2 - quit_w / 2 < event.pos[0] < width // 2 + quit_w / 2) and (
+                        height - 50 - quit_h / 2 < event.pos[1] < height - 50 + quit_h / 2):
                     terminate()
         if sound == 0 and pygame.mixer.music.get_busy():
             pygame.mixer.music.stop()
         if sound == 1 and not pygame.mixer.music.get_busy():
             pygame.mixer.music.play(-1)
-    return
-
+        if (width // 2 - start_w / 2 < mousepos[0] < width // 2 + start_w / 2) and (
+                height // 2 - start_h / 2 < mousepos[1] < height // 2 + start_h / 2):
+            text_render("Новая игра", width // 2, height // 2, (100, 255, 100))
+        else:
+            text_render("Новая игра", width // 2, height // 2, (100, 200, 100))
+        if (width // 2 - quit_w / 2 < mousepos[0] < width // 2 + quit_w / 2) and (
+                height - 50 - quit_h / 2 < mousepos[1] < height - 50 + quit_h / 2):
+            text_render("Выход", width // 2, height - 50, (255, 0, 0))
+        else:
+            text_render("Выход", width // 2, height - 50, (220, 0, 0))
+        if sound == 1:
+            if (width - 50 < mousepos[0] < width - 10) and (
+                    10 < mousepos[1] < 50):
+                screen.blit(load_image('volume_2.png'), (width-50, 10))
+            else:
+                screen.blit(load_image('volume.png'), (width - 50, 10))
+        else:
+            if(width-50 < mousepos[0] < width - 10) and (
+                    10 < mousepos[1] < 50):
+                screen.blit(load_image('voice_off_2.png'), (width - 50, 10))
+            else:
+                screen.blit(load_image('voice_off.png'), (width-50, 10))
+        pygame.display.update()
 
 def score():
     global phase, time_record
     print(time_, time_record)
-    if time_ > time_record:
+    if int(time_) > time_record:
         time_record = int(time_)
         record = True
     else:
@@ -186,16 +205,10 @@ def score():
     fon = pygame.transform.scale(load_image(BACK[0]), (width, height))
     screen.blit(fon, (0, 0))
     text_render("Вы проиграли", width // 2, height // 2, (255, 0, 0))
-    font = pygame.font.Font(None, 50)
-    text = font.render("Вы проиграли", 1, (255, 0, 0))
     if record:
         text_render(f"Новый рекорд: {time_record}", width // 2, height // 4, (100, 255, 100))
-        font = pygame.font.Font(None, 50)
-        text = font.render(f"Новый рекорд: {time_record}", 1, (100, 255, 100))
     else:
-        text_render(f"Ваше время: {time_}, рекорд: {time_record}", width // 2, height // 4, (255, 0, 0))
-        font = pygame.font.Font(None, 50)
-        text = font.render(f"Ваше время: {time_}, рекорд: {time_record}", 1, (255, 0, 0))
+        text_render(f"Ваше время: {int(time_)}, рекорд: {time_record}", width // 2, height // 4, (255, 0, 0))
     pygame.display.flip()
     while True:
         for event in pygame.event.get():
@@ -213,7 +226,7 @@ def gameplay():
     loadLevel()
     monsta = list()
     if not hero:
-        hero = Player(playerX, playerY)  # создаем героя по (x,y) координатам
+        hero = Player(playerX, playerY)  # создаем героя по (x, y) координатам
     else:
         hero.__init__(playerX, playerY)
     pygame.mixer.music.stop()
@@ -290,7 +303,7 @@ def gameplay():
         screen.blit(fon, (0, 0))
         animated.update()  # показываем анимацию
         monsters.update(platforms)  # передвигаем всех монстров
-        camera.update(hero)  # центризируем камеру относительно персонажа
+        camera.update(hero)  # центрируем камеру относительно персонажа
         hero.update(left, right, up, running, platforms)  # передвижение
         for e in all_sprites:
             screen.blit(e.image, camera.apply(e))

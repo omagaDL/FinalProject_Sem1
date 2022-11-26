@@ -328,5 +328,6 @@ while True:
         start_screen()
     elif phase == 'score':
         score()
+        platforms = []
     elif phase == 'gameplay':
         gameplay()

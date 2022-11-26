@@ -25,7 +25,7 @@ class Monster(sprite.Sprite):
         self.startY = y
         self.maxLengthLeft = maxLengthLeft  # максимальное расстояние, которое может пройти в одну сторону
         self.maxLengthUp = maxLengthUp  # максимальное расстояние, которое может пройти в одну сторону, вертикаль
-        self.xvel = left  # cкорость передвижения по горизонтали, 0 - стоит на месте
+        self.xvel = left  # скорость передвижения по горизонтали, 0 - стоит на месте
         self.yvel = up  # скорость движения по вертикали, 0 - не двигается
         boltAnim = []
         for anim in ANIMATION_MONSTERHORYSONTAL:
@@ -43,10 +43,10 @@ class Monster(sprite.Sprite):
 
         self.collide(platforms)
 
-        if (abs(self.startX - self.rect.x) > self.maxLengthLeft):
-            self.xvel = -self.xvel  # если прошли максимальное растояние, то идеи в обратную сторону
-        if (abs(self.startY - self.rect.y) > self.maxLengthUp):
-            self.yvel = -self.yvel  # если прошли максимальное растояние, то идеи в обратную сторону, вертикаль
+        if abs(self.startX - self.rect.x) > self.maxLengthLeft:
+            self.xvel = -self.xvel  # если прошли максимальное расстояние, то идеи в обратную сторону
+        if abs(self.startY - self.rect.y) > self.maxLengthUp:
+            self.yvel = -self.yvel  # если прошли максимальное расстояние, то идеи в обратную сторону, вертикаль
 
     def collide(self, platforms):
         for p in platforms:

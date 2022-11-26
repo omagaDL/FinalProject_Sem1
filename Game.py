@@ -11,7 +11,7 @@ import random
 
 pygame.init()
 FILE_DIR = os.path.dirname(__file__)
-size = width, height = 1280, 720  # размерчик нужно будет поменять
+size = width, height = 800, 600  # размерчик нужно будет поменять
 level_h, level_w = 0, 0
 clock = pygame.time.Clock()  # вот тут вот вообще лучше ничего не трогать(и на строку ниже тоже)
 screen = pygame.display.set_mode(size)

@@ -7,6 +7,7 @@ import os
 import level
 import enimies
 
+
 MOVE_SPEED = 7
 MOVE_EXTRA_SPEED = 2.5  # ускорение
 WIDTH = 22
@@ -19,22 +20,21 @@ ANIMATION_DELAY = 0.1  # скорость смены кадров
 ANIMATION_SUPER_SPEED_DELAY = 0.05  # скорость смены кадров при ускорении
 ICON_DIR = os.path.dirname(__file__)  # Полный путь к каталогу с файлами
 
-ANIMATION_RIGHT = [(f'{ICON_DIR}/data/samus/r1.png'),
-                   (f'{ICON_DIR}/data/samus/r2.png'),
-                   (f'{ICON_DIR}/data/samus/r3.png'),
-                   (f'{ICON_DIR}/data/samus/r4.png')]
-ANIMATION_LEFT = [(f'{ICON_DIR}/data/samus/l1.png'),
-                  (f'{ICON_DIR}/data/samus/l2.png'),
-                  (f'{ICON_DIR}/data/samus/l3.png'),
-                  (f'{ICON_DIR}/data/samus/l4.png')]
-ANIMATION_JUMP_LEFT = [(f'{ICON_DIR}/data/samus/jl.png', 0.1)]
-ANIMATION_JUMP_RIGHT = [(f'{ICON_DIR}/data/samus/jr.png', 0.1)]
-ANIMATION_JUMP = [(f'{ICON_DIR}/data/samus/j.png', 0.1)]
-ANIMATION_STAY = [(f'{ICON_DIR}/data/samus/0.png', 0.1)]
-
 
 class Player(sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, character):
+        ANIMATION_RIGHT = [f'{ICON_DIR}/data/{character}/r1.png',
+                           f'{ICON_DIR}/data/{character}/r2.png',
+                           f'{ICON_DIR}/data/{character}/r3.png',
+                           f'{ICON_DIR}/data/{character}/r4.png']
+        ANIMATION_LEFT = [f'{ICON_DIR}/data/{character}/l1.png',
+                          f'{ICON_DIR}/data/{character}/l2.png',
+                          f'{ICON_DIR}/data/{character}/l3.png',
+                          f'{ICON_DIR}/data/{character}/l4.png']
+        ANIMATION_JUMP_LEFT = [(f'{ICON_DIR}/data/{character}/jl.png', 0.1)]
+        ANIMATION_JUMP_RIGHT = [(f'{ICON_DIR}/data/{character}/jr.png', 0.1)]
+        ANIMATION_JUMP = [(f'{ICON_DIR}/data/{character}/j.png', 0.1)]
+        ANIMATION_STAY = [(f'{ICON_DIR}/data/{character}/0.png', 0.1)]
         sprite.Sprite.__init__(self)
         self.xvel = 0  # скорость перемещения. 0 - стоять на месте
         self.startX = x  # Начальная позиция Х, пригодится когда будем переигрывать уровень
@@ -126,7 +126,7 @@ class Player(sprite.Sprite):
         if not self.onGround:
             self.yvel += GRAVITY
 
-        self.onGround = False;  # Мы не знаем, когда мы на земле((
+        self.onGround = False  # Мы не знаем, когда мы на земле((
         self.rect.y += self.yvel
         self.collide(0, self.yvel, platforms)
 

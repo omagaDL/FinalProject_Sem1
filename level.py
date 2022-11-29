@@ -11,8 +11,8 @@ PLATFORM_COLOR = "#000000"
 ICON_DIR = os.path.dirname(__file__)  # Полный путь к каталогу с файлами
 
 ANIMATION_BLOCKTELEPORT = [
-    (f'{ICON_DIR}/data/blocks/portal2.png'),
-    (f'{ICON_DIR}/data/blocks/portal1.png')]
+    f'{ICON_DIR}/data/blocks/portal2.png',
+    f'{ICON_DIR}/data/blocks/portal1.png']
 
 
 class Platform(sprite.Sprite):

@@ -137,7 +137,8 @@ class Player(sprite.Sprite):
         for p in platforms:
             if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
                 if isinstance(p, level.BlockDie) or isinstance(p,
-                                                               enimies.Monster):  # если пересекаемый блок - level.BlockDie или Monster
+                                                               enimies.Monster):  # если пересекаемый блок -
+                    # level.BlockDie или Monster
                     self.die()  # умираем
                 elif isinstance(p, level.BlockTeleport):
                     self.teleporting(p.goX, p.goY)

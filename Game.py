@@ -200,6 +200,7 @@ def start_screen():
                     terminate()
                 elif button('Выбор героя', width // 2, height // 2 + 50, event):
                     phase = 'hero_choice'
+                    return
                 elif button('Выбор управления', width // 2, height // 2 + 150, event):
                     phase = 'control_choice'
                     return

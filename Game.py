@@ -28,6 +28,7 @@ time_ = 0
 time_record = 0
 new_game = 1
 character = 'samus'
+control = 'Arrows'
 platforms = []
 mousepos = [0,0]
 
@@ -199,6 +200,8 @@ def start_screen():
                     terminate()
                 elif button('Выбор героя', width // 2, height // 2 + 50, event):
                     phase = 'hero_choice'
+                elif button('Выбор управления', width // 2, height // 2 + 150, event):
+                    phase = 'control_choice'
                     return
         if sound == 0 and pygame.mixer.music.get_busy():
             pygame.mixer.music.stop()
@@ -207,6 +210,7 @@ def start_screen():
         text_render('Новая игра', width // 2, height // 2 - 50, GREEN, BRIGHTGREEN, mousepos)
         text_render('Выход', width // 2, height - 50,RED, BRIGHTRED,  mousepos)
         text_render('Выбор героя', width // 2, height // 2 + 50,GREEN, BRIGHTGREEN,  mousepos)
+        text_render('Выбор управления', width // 2, height // 2 + 150,GREEN, BRIGHTGREEN, mousepos)
         if sound == 1:
             if (width - 50 < mousepos[0] < width - 10) and (
                     10 < mousepos[1] < 50):
@@ -254,7 +258,6 @@ def score():
 
 def gameplay():
     global phase, hero, time_, all_sprites, level, mousepos
-    time_start = time_lib.time()
     loadLevel()
     monsta = list()
     if not hero:
@@ -274,6 +277,7 @@ def gameplay():
     left = right = False  # по умолчанию - стоим
     up = False
     running = False
+    game_start=False
     all_sprites.add(hero)
 
     timer = pygame.time.Clock()
@@ -286,27 +290,65 @@ def gameplay():
     tm_last = 0
     while not hero.dead:  # Основной цикл программы
         timer.tick(60)
-        tm += 1
+        if game_start:    # Игра начинается только после начала движения
+            tm += 1
         for e in pygame.event.get():  # Обрабатываем события
             if e.type == QUIT:
                 terminate()
-            if e.type == KEYDOWN and e.key == K_UP:
-                up = True
-            if e.type == KEYDOWN and e.key == K_LEFT:
-                left = True
-            if e.type == KEYDOWN and e.key == K_RIGHT:
-                right = True
-            if e.type == KEYDOWN and e.key == K_LSHIFT:
-                running = True
+            if control=='Arrows': # Управление стрелочками
+                if e.type == KEYDOWN and e.key == K_UP:
+                    up = True
+                    if not game_start:
+                        time_start = time_lib.time()
+                        game_start = True
+                if e.type == KEYDOWN and e.key == K_LEFT:
+                    left = True
+                    if not game_start:
+                        time_start = time_lib.time()
+                        game_start = True
+                if e.type == KEYDOWN and e.key == K_RIGHT:
+                    right = True
+                    if not game_start:
+                        time_start = time_lib.time()
+                        game_start = True
+                if e.type == KEYDOWN and e.key == K_LSHIFT:
+                    running = True
 
-            if e.type == KEYUP and e.key == K_UP:
-                up = False
-            if e.type == KEYUP and e.key == K_RIGHT:
-                right = False
-            if e.type == KEYUP and e.key == K_LEFT:
-                left = False
-            if e.type == KEYUP and e.key == K_LSHIFT:
-                running = False
+                if e.type == KEYUP and e.key == K_UP:
+                    up = False
+                if e.type == KEYUP and e.key == K_RIGHT:
+                    right = False
+                if e.type == KEYUP and e.key == K_LEFT:
+                    left = False
+                if e.type == KEYUP and e.key == K_LSHIFT:
+                    running = False
+            elif control=='WASD': # Управление WASD
+                if e.type == KEYDOWN and e.key == K_w:
+                    up = True
+                    if not game_start:
+                        time_start = time_lib.time()
+                        game_start = True
+                if e.type == KEYDOWN and e.key == K_a:
+                    left = True
+                    if not game_start:
+                        time_start = time_lib.time()
+                        game_start = True
+                if e.type == KEYDOWN and e.key == K_d:
+                    right = True
+                    if not game_start:
+                        time_start = time_lib.time()
+                        game_start = True
+                if e.type == KEYDOWN and e.key == K_LSHIFT:
+                    running = True
+
+                if e.type == KEYUP and e.key == K_w:
+                    up = False
+                if e.type == KEYUP and e.key == K_d:
+                    right = False
+                if e.type == KEYUP and e.key == K_a:
+                    left = False
+                if e.type == KEYUP and e.key == K_LSHIFT:
+                    running = False
             if e.type == KEYDOWN and e.key == K_ESCAPE:
                 hero.dead = True
             if e.type == MOUSEMOTION:
@@ -336,7 +378,6 @@ def gameplay():
     pygame.display.update()
     time_ = time_lib.time() - time_start
 
-
 def hero_choice():
     characters = [['samus', width // 2 - 100, height // 2], ['mario', width // 2 + 100, height // 2]]
     global sound, phase, new_game, character, mousepos
@@ -356,6 +397,7 @@ def hero_choice():
                 for i in characters:
                     if button(i[0], i[1], i[2], event):
                         character = i[0]
+                        phase = 'start_screen'
                         return
         if sound == 0 and pygame.mixer.music.get_busy():
             pygame.mixer.music.stop()
@@ -364,6 +406,36 @@ def hero_choice():
         text_render('Назад', width // 2, height - 50, RED, BRIGHTRED, mousepos)
         text_render('Samus', width // 2 - 100, height // 2, GREEN, BRIGHTGREEN, mousepos)
         text_render('Mario', width // 2 + 100, height // 2, GREEN, BRIGHTGREEN, mousepos)
+        pygame.display.update()
+
+def control_choice(): # Выбор управления
+    controls = [['WASD', width // 2 - 100, height // 2], ['Arrows', width // 2 + 100, height // 2]]
+    global sound, phase, new_game, control, mousepos
+    new_game = 0
+    fon = pygame.transform.scale(load_image(BACK[1]), (width, height))
+    screen.blit(fon, (0, 0))
+    while True:
+        pygame.display.flip()
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEMOTION:
+                mousepos = event.pos
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if button('Назад', width // 2, height - 50, event):
+                    phase = 'start_screen'
+                    return
+                for i in controls:
+                    if button(i[0], i[1], i[2], event):
+                        control = i[0]
+                        phase = 'start_screen'
+                        return
+        if sound == 0 and pygame.mixer.music.get_busy():
+            pygame.mixer.music.stop()
+        if sound == 1 and not pygame.mixer.music.get_busy():
+            pygame.mixer.music.play(-1)
+        text_render('Назад', width // 2, height - 50, RED, BRIGHTRED, mousepos)
+        text_render('WASD', width // 2 - 100, height // 2, GREEN, BRIGHTGREEN, mousepos)
+        text_render('Arrows', width // 2 + 100, height // 2, GREEN, BRIGHTGREEN, mousepos)
         pygame.display.update()
 
 
@@ -379,3 +451,5 @@ while True:
         gameplay()
     elif phase == 'hero_choice':
         hero_choice()
+    elif phase == 'control_choice':
+        control_choice()

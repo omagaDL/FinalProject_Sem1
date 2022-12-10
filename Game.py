@@ -1,9 +1,7 @@
 import time as time_lib
 import pygame
 import sys
-import os
 from pygame.locals import *
-from pygame import *
 from level import *
 from enimies import *
 import random
@@ -26,11 +24,15 @@ death = pygame.mixer.Sound('data_death.wav')
 hero = None
 time_ = 0
 time_record = 0
+time_start = 0
 new_game = 1
+was_paused = False
 character = 'samus'
 control = 'Arrows'
 platforms = []
 mousepos = [0,0]
+chx = 0
+chy = 0
 
 
 COLORS = [RED, BRIGHTRED, GREEN, BRIGHTGREEN] = [(220, 0, 0), (255, 0, 0), (100, 200, 100), (100, 255, 100)]
@@ -258,7 +260,7 @@ def score():
 
 
 def gameplay():
-    global phase, hero, time_, all_sprites, level, mousepos
+    global phase, hero, time_, all_sprites, level, mousepos, was_paused, time_start
     loadLevel()
     monsta = list()
     if not hero:
@@ -278,7 +280,7 @@ def gameplay():
     left = right = False  # по умолчанию - стоим
     up = False
     running = False
-    game_start=False
+    game_start = False
     all_sprites.add(hero)
 
     timer = pygame.time.Clock()
@@ -296,7 +298,7 @@ def gameplay():
         for e in pygame.event.get():  # Обрабатываем события
             if e.type == QUIT:
                 terminate()
-            if control=='Arrows': # Управление стрелочками
+            if control == 'Arrows':  # Управление стрелочками
                 if e.type == KEYDOWN and e.key == K_UP:
                     up = True
                     if not game_start:
@@ -323,7 +325,7 @@ def gameplay():
                     left = False
                 if e.type == KEYUP and e.key == K_LSHIFT:
                     running = False
-            elif control=='WASD': # Управление WASD
+            elif control == 'WASD':  # Управление WASD
                 if e.type == KEYDOWN and e.key == K_w:
                     up = True
                     if not game_start:
@@ -351,7 +353,9 @@ def gameplay():
                 if e.type == KEYUP and e.key == K_LSHIFT:
                     running = False
             if e.type == KEYDOWN and e.key == K_ESCAPE:
-                hero.dead = True
+                was_paused = True
+                phase = 'pause_menu'
+                return
             if e.type == MOUSEMOTION:
                 mousepos = e.pos
             if tm - tm_last > 50:
@@ -381,7 +385,7 @@ def gameplay():
 
 def hero_choice():
     characters = [['samus', width // 2 - 100, height // 2], ['mario', width // 2 + 100, height // 2]]
-    global sound, phase, new_game, character, mousepos
+    global sound, phase, new_game, character, mousepos, was_paused
     new_game = 0
     fon = pygame.transform.scale(load_image(BACK[1]), (width, height))
     screen.blit(fon, (0, 0))
@@ -392,8 +396,13 @@ def hero_choice():
             if event.type == pygame.MOUSEMOTION:
                 mousepos = event.pos
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if button('Назад', width // 2, height - 50, event):
+                if button('Назад', width // 2, height - 50, event) and not was_paused:
+                    was_paused = False
                     phase = 'start_screen'
+                    return
+                elif button('Назад', width // 2, height - 50, event):
+                    was_paused = True
+                    phase = 'pause_menu'
                     return
                 for i in characters:
                     if button(i[0], i[1], i[2], event):
@@ -411,7 +420,7 @@ def hero_choice():
 
 def control_choice(): # Выбор управления
     controls = [['WASD', width // 2 - 100, height // 2], ['Arrows', width // 2 + 100, height // 2]]
-    global sound, phase, new_game, control, mousepos
+    global sound, phase, new_game, control, mousepos, was_paused
     new_game = 0
     fon = pygame.transform.scale(load_image(BACK[1]), (width, height))
     screen.blit(fon, (0, 0))
@@ -422,14 +431,23 @@ def control_choice(): # Выбор управления
             if event.type == pygame.MOUSEMOTION:
                 mousepos = event.pos
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if button('Назад', width // 2, height - 50, event):
+                if button('Назад', width // 2, height - 50, event) and not was_paused:
                     phase = 'start_screen'
+                    return
+                elif button('Назад', width // 2, height - 50, event):
+                    was_paused = True
+                    phase = 'pause_menu'
                     return
                 for i in controls:
                     if button(i[0], i[1], i[2], event):
                         control = i[0]
-                        phase = 'start_screen'
-                        return
+                        if not was_paused:
+                            phase = 'start_screen'
+                            return
+                        else:
+                            was_paused = True
+                            phase = 'pause_menu'
+                            return
         if sound == 0 and pygame.mixer.music.get_busy():
             pygame.mixer.music.stop()
         if sound == 1 and not pygame.mixer.music.get_busy():
@@ -438,6 +456,37 @@ def control_choice(): # Выбор управления
         text_render('WASD', width // 2 - 100, height // 2, GREEN, BRIGHTGREEN, mousepos)
         text_render('Arrows', width // 2 + 100, height // 2, GREEN, BRIGHTGREEN, mousepos)
         pygame.display.update()
+
+def pause_menu():
+    global sound, phase, new_game, mousepos, was_paused
+    fon = pygame.transform.scale(load_image(BACK[1]), (width, height))
+    screen.blit(fon, (0, 0))
+    while True:
+        pygame.display.flip()
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEMOTION:
+                mousepos = event.pos
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if button('Продолжить игру', width // 2, height//2, event):
+                    was_paused = True
+                    phase = 'gameplay'
+                    return
+                elif button('Главное Меню', width//2, height - 50, event):
+                    was_paused = False
+                    phase = 'start_screen'
+                    return
+                elif button('Выбор управления', width // 2, height // 2 + 150, event):
+                    was_paused = True
+                    phase = 'control_choice'
+                    return
+        if sound == 0 and pygame.mixer.music.get_busy():
+            pygame.mixer.music.stop()
+        if sound == 1 and not pygame.mixer.music.get_busy():
+            pygame.mixer.music.play(-1)
+        text_render('Продолжить игру', width // 2, height // 2, RED, BRIGHTRED, mousepos)
+        text_render('Выбор управления', width // 2, height // 2 + 150, GREEN, BRIGHTGREEN, mousepos)
+        text_render('Главное Меню', width // 2, height - 50, GREEN, BRIGHTGREEN, mousepos)
 
 
 animated = pygame.sprite.Group()  # все анимированные объекты, за исключением героя
@@ -454,3 +503,5 @@ while True:
         hero_choice()
     elif phase == 'control_choice':
         control_choice()
+    elif phase == 'pause_menu':
+        pause_menu()

@@ -33,6 +33,8 @@ platforms = []
 mousepos = [0,0]
 chx = 0
 chy = 0
+monsta = list()
+game_start = False
 
 
 COLORS = [RED, BRIGHTRED, GREEN, BRIGHTGREEN] = [(220, 0, 0), (255, 0, 0), (100, 200, 100), (100, 255, 100)]
@@ -172,12 +174,15 @@ def terminate():
 
 
 def start_screen():
-    global sound, phase, new_game, mousepos
+    global sound, phase, new_game, mousepos, time_
     # x = width // 2 + 50
     # y = height // 2 - 50
+    time_ = 0
     if new_game == 1:  # Чтобы музыка не начинала воспроизводиться заново при выходе из hero_choice
         pygame.mixer.music.load('data_title.mp3')
         pygame.mixer.music.play(-1)
+    for i in monsta:
+        i.kill()
     while True:
         fon = pygame.transform.scale(load_image(BACK[0]), (width, height))
         screen.blit(fon, (0, 0))
@@ -230,7 +235,8 @@ def start_screen():
 
 
 def score():
-    global phase, time_record, new_game, mousepos
+    global phase, time_, time_record, new_game, mousepos, game_start
+    game_start = False
     new_game = 1
     if int(time_) > time_record:
         time_record = int(time_)
@@ -248,6 +254,7 @@ def score():
     else:
         text_render(f"Ваше время: {int(time_)}, рекорд: {time_record}", width // 2, height // 4, BRIGHTRED)
     pygame.display.flip()
+    time_ = 0
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -260,15 +267,18 @@ def score():
 
 
 def gameplay():
-    global phase, hero, time_, all_sprites, level, mousepos, was_paused, time_start
-    loadLevel()
-    monsta = list()
+    global phase, hero, time_, all_sprites, level, mousepos, was_paused, time_start, monsta, playerX, playerY, game_start
+    if not was_paused:
+        loadLevel()
+        monsta = list()
     if not hero:
         hero = player.Player(playerX, playerY, character)  # создаем героя по (x, y) координатам
     else:
-        hero.__init__(playerX, playerY, character)
-    pygame.mixer.music.stop()
-    if sound == 1:
+        if was_paused:
+            hero.__init__(player.playerX, player.playerY, character)
+        else:
+            hero.__init__(playerX, playerY, character)
+    if sound == 1 and not was_paused:
         pygame.mixer.music.load('data_boss_fight.mp3')
         pygame.mixer.music.play(-1)
     fon = pygame.transform.scale(load_image(BACK[1]), (width, height))
@@ -280,7 +290,6 @@ def gameplay():
     left = right = False  # по умолчанию - стоим
     up = False
     running = False
-    game_start = False
     all_sprites.add(hero)
 
     timer = pygame.time.Clock()
@@ -291,6 +300,8 @@ def gameplay():
     camera = Camera(camera_configure, total_level_width, total_level_height)
     tm = 0
     tm_last = 0
+    if game_start:
+        time_start = time_lib.time()
     while not hero.dead:  # Основной цикл программы
         timer.tick(60)
         if game_start:    # Игра начинается только после начала движения
@@ -354,6 +365,7 @@ def gameplay():
                     running = False
             if e.type == KEYDOWN and e.key == K_ESCAPE:
                 was_paused = True
+                time_ += (time_lib.time() - time_start)
                 phase = 'pause_menu'
                 return
             if e.type == MOUSEMOTION:
@@ -375,13 +387,12 @@ def gameplay():
             screen.blit(e.image, camera.apply(e))
         pygame.display.update()  # обновление и вывод всех изменений на экран
     phase = 'score'
-    for i in monsta:
-        i.kill()
-    del monsta
+    was_paused = False
+
     for e in all_sprites:
         screen.blit(e.image, camera.apply(e))
     pygame.display.update()
-    time_ = time_lib.time() - time_start
+    time_ += (time_lib.time() - time_start)
 
 def hero_choice():
     characters = [['samus', width // 2 - 100, height // 2], ['mario', width // 2 + 100, height // 2]]
@@ -475,11 +486,13 @@ def pause_menu():
                 elif button('Главное Меню', width//2, height - 50, event):
                     was_paused = False
                     phase = 'start_screen'
+                    new_game = 1
                     return
                 elif button('Выбор управления', width // 2, height // 2 + 150, event):
                     was_paused = True
                     phase = 'control_choice'
                     return
+
         if sound == 0 and pygame.mixer.music.get_busy():
             pygame.mixer.music.stop()
         if sound == 1 and not pygame.mixer.music.get_busy():

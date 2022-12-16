@@ -81,7 +81,7 @@ class Player(sprite.Sprite):
         self.dead = False
 
     def update(self, left, right, up, running, platforms):
-
+        global playerX, playerY
         if up:
             if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
                 self.yvel = -JUMP_POWER
@@ -128,9 +128,11 @@ class Player(sprite.Sprite):
 
         self.onGround = False  # Мы не знаем, когда мы на земле((
         self.rect.y += self.yvel
+        playerY = self.rect.y
         self.collide(0, self.yvel, platforms)
 
         self.rect.x += self.xvel  # переносим свои положение на xvel
+        playerX = self.rect.x
         self.collide(self.xvel, 0, platforms)
 
     def collide(self, xvel, yvel, platforms):

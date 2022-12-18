@@ -30,7 +30,7 @@ was_paused = False
 character = 'samus'
 control = 'Arrows'
 platforms = []
-mousepos = [0,0]
+mousepos = [0, 0]
 chx = 0
 chy = 0
 monsta = list()
@@ -395,7 +395,8 @@ def gameplay():
     time_ += (time_lib.time() - time_start)
 
 def hero_choice():
-    characters = [['samus', width // 2 - 100, height // 2], ['mario', width // 2 + 100, height // 2]]
+    characters = [['Samus', width // 2 - 200, height // 2], ['Mario', width // 2, height // 2],
+                  ['Corvo', width // 2 + 200, height // 2]]
     global sound, phase, new_game, character, mousepos, was_paused
     new_game = 0
     fon = pygame.transform.scale(load_image(BACK[1]), (width, height))
@@ -425,8 +426,8 @@ def hero_choice():
         if sound == 1 and not pygame.mixer.music.get_busy():
             pygame.mixer.music.play(-1)
         text_render('Назад', width // 2, height - 50, RED, BRIGHTRED, mousepos)
-        text_render('Samus', width // 2 - 100, height // 2, GREEN, BRIGHTGREEN, mousepos)
-        text_render('Mario', width // 2 + 100, height // 2, GREEN, BRIGHTGREEN, mousepos)
+        for i in characters:
+            text_render(i[0], i[1], i[2], GREEN, BRIGHTGREEN, mousepos)
         pygame.display.update()
 
 def control_choice(): # Выбор управления

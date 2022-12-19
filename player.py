@@ -83,6 +83,7 @@ class Player(sprite.Sprite):
 
     def update(self, left, right, up, running, platforms):
         self.energy += 1
+        global playerX, playerY
         if up:
             if self.onGround and self.energy > 80:  # прыгаем, только когда можем оттолкнуться от земли
                 self.yvel = -JUMP_POWER
@@ -132,16 +133,19 @@ class Player(sprite.Sprite):
 
         self.onGround = False  # Мы не знаем, когда мы на земле((
         self.rect.y += self.yvel
+        playerY = self.rect.y
         self.collide(0, self.yvel, platforms)
 
         self.rect.x += self.xvel  # переносим свои положение на xvel
+        playerX = self.rect.x
         self.collide(self.xvel, 0, platforms)
 
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
             if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
                 if isinstance(p, level.BlockDie) or isinstance(p,
-                                                               enimies.Monster):  # если пересекаемый блок - level.BlockDie или Monster
+                                                               enimies.Monster):  # если пересекаемый блок -
+                    # level.BlockDie или Monster
                     self.die()  # умираем
                 elif isinstance(p, level.BlockTeleport):
                     self.teleporting(p.goX, p.goY)

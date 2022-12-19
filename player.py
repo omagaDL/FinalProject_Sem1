@@ -41,6 +41,7 @@ class Player(sprite.Sprite):
         self.startY = y
         self.yvel = 0  # скорость вертикального перемещения
         self.onGround = False  # На земле ли я?
+        self.energy = 100
         self.image = Surface((WIDTH, HEIGHT))
         self.image.fill(Color(COLOR))
         self.rect = Rect(x, y, WIDTH, HEIGHT)  # прямоугольный объект
@@ -81,10 +82,12 @@ class Player(sprite.Sprite):
         self.dead = False
 
     def update(self, left, right, up, running, platforms):
+        self.energy += 1
         global playerX, playerY
         if up:
-            if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
+            if self.onGround and self.energy > 80:  # прыгаем, только когда можем оттолкнуться от земли
                 self.yvel = -JUMP_POWER
+                self.energy -= 80
                 if running and (left or right):  # если есть ускорение и мы движемся
                     self.yvel -= JUMP_EXTRA_POWER  # то прыгаем выше
                 self.image.fill(Color(COLOR))
@@ -93,8 +96,9 @@ class Player(sprite.Sprite):
         if left:
             self.xvel = -MOVE_SPEED  # Лево = x- n
             self.image.fill(Color(COLOR))
-            if running:  # если усkорение
+            if running and self.energy > 20:  # если усkорение
                 self.xvel -= MOVE_EXTRA_SPEED  # то передвигаемся быстрее
+                self.energy -= 20
                 if not up:  # и если не прыгаем
                     self.boltAnimLeftSuperSpeed.blit(self.image,
                                                      (0, 0))  # то отображаем быструю анимацию
@@ -107,8 +111,9 @@ class Player(sprite.Sprite):
         if right:
             self.xvel = MOVE_SPEED  # Право = x + n
             self.image.fill(Color(COLOR))
-            if running:
+            if running and self.energy > 20:
                 self.xvel += MOVE_EXTRA_SPEED
+                self.energy -= 20
                 if not up:
                     self.boltAnimRightSuperSpeed.blit(self.image, (0, 0))
             else:
